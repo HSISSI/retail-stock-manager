@@ -24,7 +24,7 @@ $sqls[]= 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'ami_basic_configs`(
     `id_carrier` VARCHAR(255)
 ) ENGINE = '._MYSQL_ENGINE_.' DEFAULT CHARSET=UTF8';
 
-$sql[]= 'insert into '._DB_PREFIX_.'ami_basic_configs values ("","","","")';
+$sqls[]= 'insert into '._DB_PREFIX_.'ami_basic_configs (api_key,baseUrl,status_cmd,id_carrier) values ("test api key","test url","test id status","test id carrier")';
 
 foreach($sqls as $sql){
     if(!Db::getInstance()->execute($sql))
