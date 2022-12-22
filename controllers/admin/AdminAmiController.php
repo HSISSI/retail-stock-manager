@@ -107,7 +107,6 @@ class AdminAmiController extends ModuleAdminController{
                                 if(((int)$order['maxi'])>0){
                                     echo 'order cretion starts **<br/>';
                                     $product_id = DBInteractionsAmi::get_order_id_product($order['article']);
-                                    echo $product_id[0]['id_product'];
                                     if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['id_carrier'], $product_id[0]['id_product'], $order['maxi'],$basic_configs[0]['status_cmd'])){
                                     #if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], ''.$basic_configs[0]['carrier'], 164192, $order['maxi'], $basic_configs[0]['status_cmd'])){
                                         echo 'order creation ends';
@@ -154,7 +153,8 @@ class AdminAmiController extends ModuleAdminController{
         #echo '<br/> validation result: '.$r.'<br/>';
 
         // Get the order id after creating it from the cart.
-        #$id_order = Order::getOrderByCartId($new_cart->id);
+        $id_order = Order::getOrderByCartId($new_cart->id);
+        echo '<br/>id order: '. $id_order;
         echo "<br/>payment_module:<br/> ";
         print_r($payment_module);
         #$new_order = new Order($id_order);
