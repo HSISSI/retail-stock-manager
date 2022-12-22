@@ -143,7 +143,7 @@ class AdminAmiController extends ModuleAdminController{
         echo '<br/> product added';
         // Creating order from cart
         echo '<br/> cart id:'; echo $new_cart->id;
-        echo "<br/> Cart: <br/>";print_r($new_cart);
+        #echo "<br/> Cart: <br/>";print_r($new_cart);
         $r=$payment_module->validateOrder(
             (int) $new_cart->id,
             (int) $id_order_state,
@@ -155,8 +155,8 @@ class AdminAmiController extends ModuleAdminController{
 
         // Get the order id after creating it from the cart.
         #$id_order = Order::getOrderByCartId($new_cart->id);
-        #echo "<br/>payment_module:<br/> ";
-        #print_r($payment_module);
+        echo "<br/>payment_module:<br/> ";
+        print_r($payment_module);
         #$new_order = new Order($id_order);
         #echo '<br/>current order:<br/>';
         #print_r($payment_module->currentOrder);
