@@ -107,6 +107,15 @@ class DBInteractionsAmi{
             return $results;
         }
     }
+    //get configured product code for orders
+    public static function get_order_id_product($code_article){
+        $sql = 'select id_product from '._DB_PREFIX_.'product p left join etl_model etl_m ON (p.reference=etl_m.id_super_model)
+        left join etl_article etl_a ON (etl_m.id_code_model = etl_a.id_code_model)
+        where etl_a.id_code_article ='.$code_article;
+        if ($results = Db::getInstance()->executeS($sql)){
+            return $results;
+        }
+    }
     public static function getArticlesByMC($id_mc){
         $sql='select art.id_code_article, art.life_cycle, l.web_label 
         from etl_article art 
