@@ -123,6 +123,10 @@ class AdminAmiController extends ModuleAdminController{
         return;
     }
     public function ValidateOrder($store_number,$id_store_customer, $id_address, $id_carrier, $id_product, $product_quantity, $id_order_state){
+        echo '<br/>id_product: ' . $id_product;
+        echo '<br/>product_quantity: ' . $product_quantity;
+        echo '<br/>id_order_state: ' . $id_order_state;
+        echo '<br/>id_carrier: ' . $id_carrier;
         $module_name = 'cmi';
         $payment_module = Module::getInstanceByName($module_name);
         Context::getContext()->customer = new Customer((int) $id_store_customer);
