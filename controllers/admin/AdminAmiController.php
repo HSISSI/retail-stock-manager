@@ -146,6 +146,8 @@ class AdminAmiController extends ModuleAdminController{
             $payment_module->displayName,
             'Test auto ami order'
         );
+        echo '<br/> validation result:<br/>';print_r($r);
+
         // Get the order id after creating it from the cart.
         $id_order = Order::getOrderByCartId($new_cart->id);
         #$new_order = new Order($id_order);
