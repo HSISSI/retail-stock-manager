@@ -144,14 +144,14 @@ class AdminAmiController extends ModuleAdminController{
         // Creating order from cart
         echo '<br/> cart id:'; echo $new_cart->id;
         #echo "<br/> Cart: <br/>";print_r($new_cart);
-        $r=$payment_module->validateOrder(
+        $payment_module->validateOrder(
             (int) $new_cart->id,
             (int) $id_order_state,
             $new_cart->getOrderTotal(true, Cart::BOTH),
             $payment_module->displayName,
             'Test auto ami order'
         );
-        echo '<br/> validation result: '.$r.'<br/>';
+        #echo '<br/> validation result: '.$r.'<br/>';
 
         // Get the order id after creating it from the cart.
         #$id_order = Order::getOrderByCartId($new_cart->id);
