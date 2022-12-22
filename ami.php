@@ -98,7 +98,7 @@ class Ami extends Module{
     public function getCarrierLst(){
         $current_carrier = '';
         if($current_configs = DBInteractionsAmi::getBasicConfigs()){
-            $current_carrier = current_configs[0]['carrier'];
+            $current_carrier = current_configs[0]['id_carrier'];
         }
         $carrier_lst_html = '<option value=""></option>';
         if($res = DBInteractionsAmi::getCarrierLst()){
