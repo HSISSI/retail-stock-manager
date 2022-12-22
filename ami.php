@@ -139,7 +139,7 @@ class Ami extends Module{
             $config_details['api_key'] = $res[0]['api_key'];
             $config_details['baseUrl'] = $res[0]['baseUrl'];
             $config_details['status_cmd'] = $res[0]['status_cmd'];
-            $config_details['carrier'] = $res[0]['carrier'];
+            $config_details['carrier'] = $res[0]['id_carrier'];
         }
         echo json_encode($config_details);
     }
