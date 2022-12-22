@@ -108,7 +108,7 @@ class AdminAmiController extends ModuleAdminController{
                                     echo 'order cretion starts **<br/>';
                                     $product_id = DBInteractionsAmi::get_order_id_product($order['article']);
                                     echo $product_id[0]['id_product'];
-                                    if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['carrier'], $product_id[0]['id_product'], $order['maxi'],$basic_configs[0]['status_cmd'])){
+                                    if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['id_carrier'], $product_id[0]['id_product'], $order['maxi'],$basic_configs[0]['status_cmd'])){
                                     #if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], ''.$basic_configs[0]['carrier'], 164192, $order['maxi'], $basic_configs[0]['status_cmd'])){
                                         echo 'order creation ends';
                                     }
