@@ -137,6 +137,7 @@ class AdminAmiController extends ModuleAdminController{
         $new_cart->add();
         echo 'am here';
         $new_cart->updateQty($product_quantity, $id_product); // Added product_quantity to product with the id number id_product
+        echo '<br/> product added';
         // Creating order from cart
         $r=$payment_module->validateOrder(
             (int) $new_cart->id,
