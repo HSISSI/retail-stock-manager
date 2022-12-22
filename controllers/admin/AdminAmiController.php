@@ -168,6 +168,8 @@ class AdminAmiController extends ModuleAdminController{
                 'scenario' => $scenario,
             ];
             $res=$this->insertFFMOrder($orderData);
+            echo "<br/>finish creation:<br/>";
+            print_r($res);
             return $res;            
         }
     }
