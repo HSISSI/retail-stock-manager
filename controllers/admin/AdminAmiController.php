@@ -110,8 +110,9 @@ class AdminAmiController extends ModuleAdminController{
                                     echo $product_id[0]['id_product'];
                                     if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['carrier'], $product_id[0]['id_product'], $order['maxi'],$basic_configs[0]['status_cmd'])){
                                     #if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], ''.$basic_configs[0]['carrier'], 164192, $order['maxi'], $basic_configs[0]['status_cmd'])){
-                                        echo 'order creation ends';die;
+                                        echo 'order creation ends';
                                     }
+                                    die;
                                 }
                             }
                         }
@@ -134,6 +135,7 @@ class AdminAmiController extends ModuleAdminController{
         $new_cart->id_currency = $this->context->currency->id;
         $new_cart->id_carrier = $id_carrier;
         $new_cart->add();
+        echo 'am here';
         $new_cart->updateQty($product_quantity, $id_product); // Added product_quantity to product with the id number id_product
         // Creating order from cart
         $r=$payment_module->validateOrder(
