@@ -157,8 +157,8 @@ class AdminAmiController extends ModuleAdminController{
         echo "<br/>payment_module:<br/> ";
         print_r($payment_module);
         #$new_order = new Order($id_order);
-        echo '<br/>current order:<br/>';
-        print_r($payment_module->currentOrder);
+        #echo '<br/>current order:<br/>';
+        #print_r($payment_module->currentOrder);
         if ($payment_module->currentOrder) {
             $provider_StoreId = '1949';
             $reference_StoreId = $store_number;
