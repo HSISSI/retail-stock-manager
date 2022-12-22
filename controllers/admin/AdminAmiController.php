@@ -150,7 +150,8 @@ class AdminAmiController extends ModuleAdminController{
 
         // Get the order id after creating it from the cart.
         $id_order = Order::getOrderByCartId($new_cart->id);
-        echo "<br/>id order: ";echo $id_order;
+        echo "<br/>payment_module:<br/> ";
+        print_r($payment_module);
         #$new_order = new Order($id_order);
         echo '<br/>current order:<br/>';
         print_r($payment_module->currentOrder);
