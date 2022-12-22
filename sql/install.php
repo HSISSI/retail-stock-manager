@@ -21,7 +21,7 @@ $sqls[]= 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'ami_basic_configs`(
     `api_key` VARCHAR(255),
     `baseUrl` VARCHAR(255),
     `status_cmd` VARCHAR(255),
-    `icarrier` VARCHAR(255)
+    `id_carrier` VARCHAR(255)
 ) ENGINE = '._MYSQL_ENGINE_.' DEFAULT CHARSET=UTF8';
 
 $sql[]= 'insert into '._DB_PREFIX_.'ami_basic_configs values ("","","","")';

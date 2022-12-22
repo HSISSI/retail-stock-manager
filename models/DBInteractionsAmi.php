@@ -27,7 +27,7 @@ class DBInteractionsAmi{
         }
     }
     public static function setBasicConfigs($api_key, $baseUrl,$status_cmd, $carrier){
-        $req='update ' . _DB_PREFIX_ . 'ami_basic_configs set api_key="'.$api_key.'" , baseUrl="'.$baseUrl.'", status_cmd="'.$status_cmd.'", carrier="'.$carrier.'"';
+        $req='update ' . _DB_PREFIX_ . 'ami_basic_configs set api_key="'.$api_key.'" , baseUrl="'.$baseUrl.'", status_cmd="'.$status_cmd.'", id_carrier="'.$carrier.'"';
         if (!Db::getInstance()->execute($req)){
             return false;
         }else{
