@@ -149,11 +149,7 @@ class AdminAmiController extends ModuleAdminController{
             (int) $id_order_state,
             $new_cart->getOrderTotal(true, Cart::BOTH),
             $payment_module->displayName,
-            'Test auto ami order',
-            [],
-            null,
-            false,
-            $new_cart->secure_key
+            'Test auto ami order'
         );
         #echo '<br/> validation result: '.$r.'<br/>';
 
