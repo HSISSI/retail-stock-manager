@@ -106,7 +106,7 @@ class AdminAmiController extends ModuleAdminController{
                             if(($response->item == $order['article']) && ((int)$response->stock <= (int)$order['mini'])){
                                 if(((int)$order['maxi'])>0){
                                     echo 'order cretion starts **<br/>';
-                                    if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['carrier'], $order['article'], $order['maxi'],$basic_configs[0]['status_cmd'])){
+                                    if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['carrier'], (int)$order['article'], $order['maxi'],$basic_configs[0]['status_cmd'])){
                                     #if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], ''.$basic_configs[0]['carrier'], 164192, $order['maxi'], $basic_configs[0]['status_cmd'])){
                                         echo 'order creation ends';die;
                                     }
