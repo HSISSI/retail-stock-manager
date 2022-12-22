@@ -112,7 +112,7 @@ class Ami extends Module{
     public function getOrderStates(){
         $current_state = '';
         if($current_configs = DBInteractionsAmi::getBasicConfigs()){
-            $current_state = current_configs[0]['id_order_state'];
+            $current_state = current_configs[0]['status_cmd'];
         }
         $order_states_lst_html = '<option value=""></option>';
         if($res = DBInteractionsAmi::getOrderStates()){
