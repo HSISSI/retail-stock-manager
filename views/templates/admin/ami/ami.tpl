@@ -5,10 +5,17 @@
 <div class="panel">
     <div class="panel-heading">
         {l s='Paramètrage des fréquences' mod='ami'}
-    </div>
+    
+        </div class="create_orders">
+            <button type="submit" value="1" id="sync_orders" name="sync_orders" class="btn btn-default pull-right" style="padding-bottom:10px !important">
+                <i class="process-icon-sync"></i> Cliquer pour lancer la creation des commandes d'aujourd'hui.
+		    </button>
+        <div>
 
+    </div>
     <div class="panel-body">
         <div class="panel-body"> 
+            <hr />
              <div class="table-responsive-row clearfix">
                 <table class="table">
                     <thead>

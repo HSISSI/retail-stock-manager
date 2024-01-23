@@ -48,4 +48,21 @@ $(document).ready(function(){
             console.log(errorThrown)
         });
     });
+
+
+    // sync
+    $('#sync_orders').click(function(){
+        $.ajax({
+            url: contr_link + '&action=createOrders'
+        })
+        .done(function(data){
+            console.log(data);
+            console.log('** orders synced **');
+            $.notify("orders synced !","success");
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            console.log(errorThrown)
+        });
+    });
+
 });

@@ -45,45 +45,46 @@ class AdminAmiController extends ModuleAdminController{
         }
         return true;
     }
+    public function Log2Console($tag, $msg){
+        echo "<script>console.log('" .$tag. " : " . $msg . "' );</script>";
+    }
 
-    public function checkStock($stores,$grantToken, $context, $api_key, $products){
+    public function checkStock($store,$grantToken, $context, $api_key, $products){
         $result = [];
-        $basic_configs = DBInteractionsAmi::getBasicConfigs();
-        $productQuery = "";
+        $baseUrl = Configuration::get('DECA_STOCK_URL');
+        $productQuery = '';
         if (is_array($products)) {
-            foreach ($products as $product => $value){
-                if(empty($productQuery)){
-                    $productQuery .= "item=${value}";
-                }else {
-                    $productQuery .= "&item=${value}";
-                }
+            foreach ($products as $product => $value) {
+                $productQuery .= empty($productQuery)?"item=${value}":"&item=${value}";
             }
         } else {
             $productQuery .= "item=${products}";
         }
-        $url = "${context}retail-stock-pictures/api/v1/stores/${stores}/items/stocks/sale/pictures?${productQuery}";
-        #$grantToken = 'eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1BSU4iLCJwaS5hdG0iOiI1In0.eyJzY29wZSI6WyJvcGVuaWQiLCJwcm9maWxlIl0sImNsaWVudF9pZCI6IkMxMWRmZWU2OTMxMDE5NzNkNDg4NDc5YTkyYWU5MjQ2NDI0OGIxMjkwIiwiaXNzIjoiaWRwZGVjYXRobG9uIiwianRpIjoiSmY1ZFl3RHlkSyIsInN1YiI6IkMxMWRmZWU2OTMxMDE5NzNkNDg4NDc5YTkyYWU5MjQ2NDI0OGIxMjkwIiwib3JpZ2luIjoiY29ycG9yYXRlIiwiZXhwIjoxNjcxMTE4MTI2fQ.KDh_jCULFR77Ldd-FY2YBzahtY0P4BgaCcb00Rsc-eT_JYCXFY5ygc5BlqE4srHI-RWVHNdoIg-R1N0q0fLejP0sJrWiUXb9aiieDNiHlHv1IlOxzj1eqlTBcOswTQBqThVAPW9wYIBp5DwXvSJpVqe8ignKQCMH38x--xqNFnVfr1kIhp8cFhJg35VKeNUwl4-GkCw4SPGiNAtUkkGvTyeXPHwN6jdqKI5qazA8ptcJZD0NAG0bpCd1BvWKGhE2W69qJ3HIdYL9kutjS7XYRpGiLZC55L0VkGww2Hr-Rt51riZ3IBKfd2-eNKgHZLDs9aFY6QKUL1cINKRZj4sa_g';
+        $url = "${baseUrl}${store}/items/stocks/sale/pictures?${productQuery}";
         $aHttpHeaders = [
-            'x-api-key: '. $api_key,
-            'Authorization: Bearer '.$grantToken,
+            'x-api-key: ' . Configuration::get('DECA_STOCK_KEY'),
+            'Authorization: Bearer ' . $grantToken,
         ];
-        if(false !== ($ch = curl_init())) {
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $aHttpHeaders);
+
+        if (false !== ($ch = curl_init())) {
+            $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, 1000); // maximum amount of time that is allowed to make the connection to the server.
-            curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5000); // is a maximum amount of time in seconds to which the execution of individual cURL extension function calls will be limited. Note that the value for this setting should include the value for CURLOPT_CONNECTTIMEOUT
-            $response = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            if($httpcode == 200){
-                $result = json_decode($response);
-            }else {
-                throw new Exception('Error reaching stock api');
-            }
-        }else {
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+            // mandatory in local for api to work, test to comment the following two lines in production should it will work without.
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            
+            $headers = array();
+            $headers[] = 'Accept: application/json;charset=UTF-8';
+            $headers[] = 'Authorization: Bearer '. $grantToken;
+            $headers[] = 'X-Api-Key: '. Configuration::get('DECA_STOCK_KEY');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            if (curl_errno($ch)) {
+                echo 'Error:' . curl_error($ch);
+                }
+            $result = json_decode(curl_exec($ch));
+        } else {
             throw new Exception('Curl init failed.');
         }
         return $result;
@@ -91,27 +92,36 @@ class AdminAmiController extends ModuleAdminController{
     public function createOrders(){
         $currentDay = date('N', strtotime(date('l')));
         if($storesCronDays = DBInteractionsAmi::getCronDays($currentDay)){
-            echo '<pre>';print_r($storesCronDays);echo '<pre>';
             foreach($storesCronDays as $store){
                 if($amiOrders = DBInteractionsAmi::getAmiOrders($store['store_number'],$store['store_client_account'])){
-                    echo '<pre>';print_r($amiOrders);echo '<pre>';
-                    $grantToken = Module::getInstanceByName('deca_fedid')->getToken();    
-                    echo '<pre>';print_r(array_column($amiOrders,'article'));echo '<pre>';
+                    $customer_id_address = DBInteractionsAmi::getCustomerIdAddress($store['store_client_account']);
+                    $grantToken = Module::getInstanceByName('deca_fedid')->getToken();
                     $basic_configs = DBInteractionsAmi::getBasicConfigs();
-                    echo "check stock : ";
+                    
+                    //to remove after tests
+                    $grantToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1BSU4iLCJwaS5hdG0iOiI1In0.eyJzY29wZSI6WyJvcGVuaWQiLCJwcm9maWxlIl0sImF1dGhvcml6YXRpb25fZGV0YWlscyI6W10sImNsaWVudF9pZCI6IkMxMWRmZWU2OTMxMDE5NzNkNDg4NDc5YTkyYWU5MjQ2NDI0OGIxMjkwIiwiaXNzIjoiaWRwZGVjYXRobG9uIiwianRpIjoiZGZkdFNCUVpyZHhiNnY1cXo1aFdUeSIsInN1YiI6IkMxMWRmZWU2OTMxMDE5NzNkNDg4NDc5YTkyYWU5MjQ2NDI0OGIxMjkwIiwib3JpZ2luIjoiY29ycG9yYXRlIiwiaWF0IjoxNzA2MDI3ODQyLCJleHAiOjE3MDYwMzUwNDJ9.oW3cwym8cGWxr51NAiRbgVmfR9wJwIuvGHqi6HmYl7NRsjQ3V9PgT8F-5KdThVCbPViqG-Y4zuOcNxOaCS7EYoZOUUXw3CFArWbO29mE1jyuZFhNi423akUEtwFYHL153rthjJH4uEpbRM3XgrHQk75iFpj1tUskU5KbbdbDN2OTgt9ohlvoW-beFRzYmGqhFff-mmUPDtjty9Nr2STkg3255cTTEhEEf_gV4bvDsslBLu4wGpH1LhlW0xfkpFm-zX_WZbN-pC6ONzWM14Il_-eIoYMwDqupHBQcW7NqKh5Qr-9krbsWys5peFtKiTMYZXuxOxqESh2KAlT7UTZ-Xg";
+
+                    //check stock retail
                     $responses = $this->checkStock($store['store_number'],$grantToken, $basic_configs[0]['baseUrl'], $basic_configs[0]['api_key'], array_column($amiOrders,'article'));
-                    echo '<pre>';print_r($responses);echo '<pre>';
                     foreach($amiOrders as $order){
                         foreach($responses as $response){
                             if(($response->item == $order['article']) && ((int)$response->stock <= (int)$order['mini'])){
+                               
                                 if(((int)$order['maxi'])>0){
-                                    echo 'order cretion starts **<br/>';
-                                    $product_id = DBInteractionsAmi::get_order_id_product($order['article']);
-                                    if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], $basic_configs[0]['id_carrier'], $product_id[0]['id_product'], $order['maxi'],$basic_configs[0]['status_cmd'])){
-                                    #if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $order['id_address'], ''.$basic_configs[0]['carrier'], 164192, $order['maxi'], $basic_configs[0]['status_cmd'])){
-                                        echo 'order creation ends';
+                                     //check stock platforme before creating an order
+                                    $platforme_id = "1949";
+                                    $stock_platforme = $this->checkStock($platforme_id,$grantToken, $basic_configs[0]['baseUrl'], $basic_configs[0]['api_key'], $order['article']);
+                                    $stock_platforme = json_decode(json_encode($stock_platforme), true);
+                                    if(((int)$stock_platforme[0]['stock'] > 0) && ((int)$stock_platforme[0]['stock'] > (int)$order['maxi'])){
+                                        $product_id = DBInteractionsAmi::get_order_id_product($order['article']);
+                                        if($this->ValidateOrder($store['store_number'],$order['store_client_id'], $customer_id_address[0]['id_address'], $basic_configs[0]['id_carrier'], $product_id[0]['id_product'], $order['maxi'], $basic_configs[0]['status_cmd'])){
+                                            $this->Log2Console('success', 'order creation for article: ' . $product_id[0]['id_product'] . ' - store: '. $store['store_number']);
+                                        }else{
+                                            $this->Log2Console('error', 'order creation for article: ' . $product_id[0]['id_product'] . ' - store: '. $store['store_number']);
+                                        }
+                                    }else{
+                                        $this->Log2Console('error', 'unsuffisant stock platforme for article: ' . $product_id[0]['id_product'] . ' - store: '. $store['store_number'] . 'availible: '. $stock_platforme[0]['stock']);
                                     }
-                                    die;
                                 }
                             }
                         }
@@ -122,10 +132,6 @@ class AdminAmiController extends ModuleAdminController{
         return;
     }
     public function ValidateOrder($store_number,$id_store_customer, $id_address, $id_carrier, $id_product, $product_quantity, $id_order_state){
-        echo '<br/>id_product: ' . $id_product;
-        echo '<br/>product_quantity: ' . $product_quantity;
-        echo '<br/>id_order_state: ' . $id_order_state;
-        echo '<br/>id_carrier: ' . $id_carrier;
         $module_name = 'cmi';
         $payment_module = Module::getInstanceByName($module_name);
         Context::getContext()->customer = new Customer((int) $id_store_customer);
@@ -138,28 +144,19 @@ class AdminAmiController extends ModuleAdminController{
         $new_cart->id_currency = $this->context->currency->id;
         $new_cart->id_carrier = $id_carrier;
         $new_cart->add();
-        $new_cart->updateQty($product_quantity, $id_product); // Added product_quantity to product with the id number id_product
-        echo '<br/> product added';
+        $productAttributeID = Product::getDefaultAttribute($id_product);
+        $new_cart->updateQty((int) $product_quantity, (int) $id_product, (int) $productAttributeID); // Added product_quantity to product with the id number id_product
         // Creating order from cart
-        echo '<br/> cart id:'; echo $new_cart->id;
-        #echo "<br/> Cart: <br/>";print_r($new_cart);
         $payment_module->validateOrder(
             (int) $new_cart->id,
             (int) $id_order_state,
             $new_cart->getOrderTotal(true, Cart::BOTH),
             $payment_module->displayName,
-            'Test auto ami order'
+            'auto ami order'
         );
-        #echo '<br/> validation result: '.$r.'<br/>';
-
+        
         // Get the order id after creating it from the cart.
         $id_order = Order::getOrderByCartId($new_cart->id);
-        echo '<br/>id order: '. $id_order;
-        echo "<br/>payment_module:<br/> ";
-        print_r($payment_module);
-        #$new_order = new Order($id_order);
-        #echo '<br/>current order:<br/>';
-        #print_r($payment_module->currentOrder);
         if ($payment_module->currentOrder) {
             $provider_StoreId = '1949';
             $reference_StoreId = $store_number;
@@ -177,8 +174,6 @@ class AdminAmiController extends ModuleAdminController{
                 'scenario' => $scenario,
             ];
             $res=$this->insertFFMOrder($orderData);
-            echo "<br/>finish creation:<br/>";
-            print_r($res);
             return $res;            
         }
     }
@@ -203,33 +198,27 @@ class AdminAmiController extends ModuleAdminController{
 
     public function createScenario($provider_StoreId, $reference_StoreId, $id_carrier){
         $id_lang = Context::getContext()->language->id;
-       # $providerData = new Store((int)$provider_StoreId, $id_lang);
-    
         $scenario = [];
         $carrier = new Carrier((int)$id_carrier,$id_lang);
         $carrierName = $carrier->name;
-        #$service = $this->getService($id_delivery);
-
-        $referenceData = new Store((int)$reference_StoreId, $id_lang);
-        #$Methode_shipper = "Livraison standard - ARX";
-
+        $referenceData = DBInteractionsAmi::getStoreData($reference_StoreId, $id_lang);
         $scenario = [
         'PROVIDER' => $provider_StoreId, 
-        'NAME' => $referenceData->name,
+        'NAME' => $referenceData[0]["name"],
         'DESCRIPTION' => 'AMI auto generated order',
         'METHOD_SHIPPER' => $carrier->name,
         'METHOD_DESCR' => '',
         'STORE_ID' => $reference_StoreId,
-        'STORE_NAME' => $referenceData->name,
-        'STORE_ADDRESS1' => $referenceData->address1,
-        'STORE_ADDRESS2' => $referenceData->address2,
-        'STORE_CITY' => $referenceData->city,
+        'STORE_NAME' => $referenceData[0]["name"],
+        'STORE_ADDRESS1' => $referenceData[0]["address1"],
+        'STORE_ADDRESS2' => $referenceData[0]["address2"],
+        'STORE_CITY' => $referenceData[0]["city"],
         'STORE_STATE' => '',
-        'STORE_ZIP' => $referenceData->postcode,
+        'STORE_ZIP' => $referenceData[0]["postcode"],
         'STORE_COUNTRY' => 'MOROCCO',
         'STORE_COUNTRYCODE' => 'ma',
-        'STORE_REFERENCE' => $referenceData->store_number,
-        'STORE_PHONE' => $referenceData->phone,
+        'STORE_REFERENCE' => $reference_StoreId,
+        'STORE_PHONE' => $referenceData[0]["phone"],
         'STORE_HOURS' => '',
         'TYPE' => '1',
         'COST' => '',
@@ -252,7 +241,6 @@ class AdminAmiController extends ModuleAdminController{
             foreach($stores as $store){
                 if($store_config = DBInteractionsAmi::getStoreConfig($store['store_number'])){
                     $j=1;
-                    #$email_val = (($store_config[0]['store_client_account'] !='') && ($store['store_number'] == $store_config[0]['store_number']))?$store_config[0]['store_client_account']:'';
                     $placeholder =($store_config[0]['store_client_account']!='')?'':' placeholder="ex: decathlon@decathlon.com"';
                     $storesWeeks_html .= '<tr><td class="store_def">'.$store['name'].'<input type="text" value="'.$store_config[0]['store_client_account'].'" name="email"'.$placeholder.'></td>';
                     foreach($weekDays as $dayIdx => $day){

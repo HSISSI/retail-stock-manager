@@ -1,5 +1,12 @@
 <?php
 class DBInteractionsAmi{
+    public static function getStoreData($store_number, $id_lang){
+        $sql = 'select s.store_number, s.postcode, s.phone, s.city, sl.name, sl.address1, sl.address2 from '._DB_PREFIX_.'store s left join '._DB_PREFIX_.'store_lang sl ON (s.id_store = sl.id_store) where store_number = '.$store_number.' and id_lang = '. $id_lang;
+        if ($results = Db::getInstance()->executeS($sql)){
+            echo $result;
+            return $results;
+        }
+    }
     public static function insertFFMOrder($provider,$reference,$id_carrier,$id_order,$price,$scenario,$allscenarios,$code, $service,$FFM_Selected_Num,$id_customer,$id_cart){
         $req = 'insert into ' . _DB_PREFIX_ . 'ffm_selected (`provider`,`reference`, `date_add`, `date_upd`,`id_carrier`, `id_order`, `price`, `scenario`, `allscenarios`, `code`, `service`, `FFM_Selected_Num`,`id_customer`,`id_cart`) VALUES(' . $provider . ', "' . $reference . '", NOW(), NOW(), "' . $id_carrier . '", "' . $id_order . '", "' . $price . '", "' . $scenario . '", "' . $allscenarios . '", "' . $code . '", "' . $service . '", "' . $FFM_Selected_Num . '", "' . $id_customer . '", "' . $id_cart . '")';
         if (!Db::getInstance()->execute($req)){
@@ -42,7 +49,13 @@ class DBInteractionsAmi{
         }
     }
     public static function getAmiOrders($store_number, $store_client_account){
-        $sql='select ami.articles as article, ami.mini, ami.maxi, addr.address1, addr.address2, c.id_customer as store_client_id, addr.id_address FROM '._DB_PREFIX_.'ami_config ami, '._DB_PREFIX_.'customer c, '._DB_PREFIX_.'address addr WHERE c.email="'.$store_client_account.'" and ami.targeted_stores LIKE "%'.$store_number.'%" and addr.id_customer=c.id_customer';
+        $sql='select c.id_customer as store_client_id, ami.articles as article, ami.mini, ami.maxi FROM '._DB_PREFIX_.'ami_config ami, '._DB_PREFIX_.'ami_stores s, '._DB_PREFIX_.'customer c WHERE ami.targeted_stores LIKE "%'.$store_number.'%" and s.store_number = "'.$store_number.'" and c.email=s.store_client_account';
+        if ($results = Db::getInstance()->executeS($sql)){
+            return $results;
+        }
+    }
+    public static function getCustomerIdAddress($store_client_account){
+        $sql = 'select addr.id_address FROM '._DB_PREFIX_.'address addr, '._DB_PREFIX_.'customer c WHERE c.email="'.$store_client_account.'" and c.id_customer=addr.id_customer limit 1';
         if ($results = Db::getInstance()->executeS($sql)){
             return $results;
         }
@@ -109,9 +122,7 @@ class DBInteractionsAmi{
     }
     //get configured product code for orders
     public static function get_order_id_product($code_article){
-        $sql = 'select id_product from '._DB_PREFIX_.'product p left join etl_model etl_m ON (p.reference=etl_m.id_super_model)
-        left join etl_article etl_a ON (etl_m.id_code_model = etl_a.id_code_model)
-        where etl_a.id_code_article ='.$code_article;
+        $sql = 'select id_product from '._DB_PREFIX_.'product_attribute where reference ='.$code_article;
         if ($results = Db::getInstance()->executeS($sql)){
             return $results;
         }
